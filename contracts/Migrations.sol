@@ -2,18 +2,23 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 contract Migrations {
-  address public owner = msg.sender;
-  uint public last_completed_migration;
+    address public owner;
+    uint256 last_completed_migration;
 
-  modifier restricted() {
-    require(
-      msg.sender == owner,
-      "This function is restricted to the contract's owner"
-    );
-    _;
-  }
+    constructor() {
+        owner = msg.sender;
+    }
 
-  function setCompleted(uint completed) public restricted {
-    last_completed_migration = completed;
-  }
+    modifier onlyOwner() {
+        if (msg.sender == owner) _; // if the sender is the owner, then continue;
+    }
+
+    function setCompleted(uint256 completed_migration_number) public onlyOwner {
+        last_completed_migration = completed_migration_number; //stores the value into a new variable
+    }
+
+    function update(address new_address) public onlyOwner {
+        Migrations updated = Migrations(new_address);
+        updated.setCompleted(last_completed_migration);
+    }
 }
