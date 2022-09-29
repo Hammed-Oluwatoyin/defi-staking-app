@@ -9,7 +9,7 @@ contract Reward {
     address public owner;
 
     // set the balance
-    constructor() public {
+    constructor() {
         owner = msg.sender;
         balanceOf[msg.sender] = totalSupply;
     }

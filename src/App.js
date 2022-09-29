@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import Web3 from "web3";
 import Tether from "./truffle_abis/Tether.json";
 import Reward from "./truffle_abis/Reward.json";
+import DecentralBank from "./truffle_abis/DecentralBank.json";
 import detectEthereumProvider from "@metamask/detect-provider";
 
 function App() {
@@ -43,7 +44,7 @@ function App() {
       const networkId = await web3Api.web3.eth.net.getId();
       console.log(networkId);
       // load Tether Contract
-      console.log(Reward);
+      console.log(DecentralBank);
 
       const tetherData = Tether.networks[networkId];
       if (tetherData) {
@@ -64,20 +65,20 @@ function App() {
       }
 
       // load Reward Contract
-      // const rewardData = Reward.networks[5777];
-      // console.log(rewardData);
-      // if (rewardData) {
-      //   const rewardContract = new web3Api.web3.eth.Contract(
-      //     Reward.abi,
-      //     rewardData.address
-      //   );
+      const rewardData = Reward.networks[networkId];
+      console.log(rewardData);
+      if (rewardData) {
+        const rewardContract = new web3Api.web3.eth.Contract(
+          Reward.abi,
+          rewardData.address
+        );
 
-      //   // load reward balance
-      //   let rewardBalance = await rewardContract.methods
-      //     .balanceOf(account)
-      //     .call();
-      //   setRewardBalance(rewardBalance.toString());
-      // }
+        // load reward balance
+        let rewardBalance = await rewardContract.methods
+          .balanceOf(account)
+          .call();
+        setRewardBalance(rewardBalance.toString());
+      }
     };
 
     web3Api.web3 && getBlockchainData();
