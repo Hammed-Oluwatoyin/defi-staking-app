@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import tetherImg from "../tether.png";
+import Web3 from "web3";
 
 class Main extends Component {
   render() {
@@ -7,20 +8,40 @@ class Main extends Component {
       <div id="content" className="mt-3">
         <table className="table text-muted text-center">
           <thead>
-            <tr style={{ color: "white" }}>
+            <tr style={{ color: "black" }}>
               <th scope="col">Staking Balance</th>
-              <th cope="col">Reward Balance</th>
+              <th scope="col">Reward Balance</th>
             </tr>
           </thead>
-          <tbody style={{ color: "white" }}>
+          <tbody style={{ color: "black" }}>
             <tr>
-              <td>- USDT</td>
-              <td>Reward</td>
+              <td>
+                {Web3.utils.fromWei(
+                  this.props.stakingBalance.toString(),
+                  "Ether"
+                )}{" "}
+                USDT
+              </td>
+              <td>
+                {Web3.utils.fromWei(
+                  this.props.rewardBalance.toString(),
+                  "Ether"
+                )}
+                Reward
+              </td>
             </tr>
           </tbody>
         </table>
         <div className="card mb-2" style={{ opacity: "0.9" }}>
-          <form className="mb-3">
+          <form
+            className="mb-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              let amount = this.input.value.toString();
+              amount = Web3.utils.toWei(amount, "Ether");
+              this.props.stakeTokens(amount);
+            }}
+          >
             <div style={{ borderSpacing: "0 1em" }}>
               <label
                 className="float-left"
@@ -30,6 +51,10 @@ class Main extends Component {
               </label>
               <span className="float-right" style={{ marginRight: "8px" }}>
                 Balance:{" "}
+                {Web3.utils.fromWei(
+                  this.props.tetherBalance.toString(),
+                  "Ether"
+                )}
               </span>
               <div className="input-group mb-4">
                 <input
@@ -60,7 +85,13 @@ class Main extends Component {
               </button>
             </div>
           </form>
-          <button type="submit" className="btn btn-secondary btn-lg btn-block">
+          <button
+            type="submit"
+            className="btn btn-secondary btn-lg btn-block"
+            onClick={(event) => {
+              event.preventDefault(this.props.unstakeTokens());
+            }}
+          >
             Withdraw
           </button>
           <div className="card-body text-center" style={{ color: "blue" }}>

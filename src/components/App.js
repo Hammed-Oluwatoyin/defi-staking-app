@@ -18,10 +18,12 @@ function App() {
   const [rewardBalance, setRewardBalance] = useState(0);
   const [decentralBankContract, setDecentralBankContract] = useState({});
   const [stakingBalance, setStakingBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  console.log(tetherBalance, "tether Balance");
-  console.log(rewardBalance, "reward Balance");
-  console.log(stakingBalance, "staking Balance");
+  //console.log(decentralBankContract);
+  // console.log(tetherBalance, "tether Balance");
+  // console.log(rewardBalance, "reward Balance");
+  // console.log(stakingBalance, "staking Balance");
 
   useEffect(() => {
     const loadProvider = async () => {
@@ -55,6 +57,7 @@ function App() {
           Tether.abi,
           tetherData.address
         );
+        setTetherContract(tetherContract);
         // load Tether balance
         let tetherBalance = await tetherContract.methods
           .balanceOf(account)
@@ -75,7 +78,7 @@ function App() {
           Reward.abi,
           rewardData.address
         );
-
+        setRewardContract(rewardContract);
         // load reward balance
         let rewardBalance = await rewardContract.methods
           .balanceOf(account)
@@ -96,12 +99,14 @@ function App() {
           DecentralBank.abi,
           decentralBankData.address
         );
-
+        console.log(decentralBankContract);
+        setDecentralBankContract(decentralBankContract);
         // load DecentralBank balance
         let stakingBalance = await decentralBankContract.methods
           .stakingBalance(account)
           .call();
         setStakingBalance(stakingBalance.toString());
+        setLoading(false);
       } else {
         //if we dont load the reward Data
         alert(
@@ -113,16 +118,60 @@ function App() {
     web3Api.web3 && getBlockchainData();
   }, [web3Api.web3, account]);
 
+  // staking function
+  const stakeTokens = (amount) => {
+    setLoading(true);
+    tetherContract.methods
+      .approve(decentralBankContract._address, amount)
+      .send({ from: account })
+      .on("transactionHash", (hash) => {
+        // grab decentralBank and then grab depositTokens()....send from the state of Account....
+        decentralBankContract.methods
+          .depositTokens(amount)
+          .send({ from: account })
+          .on("transactionHash", (hash) => {
+            setLoading(false);
+            window.location.reload();
+          });
+      });
+  };
+
+  //unstake function
+  const unstakeTokens = () => {
+    setLoading(true);
+    decentralBankContract.methods
+      .unstakeTokens()
+      .send({ from: account })
+      .on("transactionHash", (hash) => {
+        setLoading(false);
+        window.location.reload();
+      });
+  };
+
   return (
     <div className="App">
       <Navbar account={account} />
       <div className="container-fluid mt-5">
         <div className="row">
-          <Main
+          <main
             role="main"
             className="col-lg-12 ml-auto mr-auto"
             style={{ maxWidth: "600px", minHeight: "100vm" }}
-          />
+          >
+            {loading ? (
+              <p id="loader" className="text-center" style={{ margin: "30px" }}>
+                Loading...
+              </p>
+            ) : (
+              <Main
+                tetherBalance={tetherBalance}
+                rewardBalance={rewardBalance}
+                stakingBalance={stakingBalance}
+                stakeTokens={stakeTokens}
+                unstakeTokens={unstakeTokens}
+              />
+            )}
+          </main>
         </div>
       </div>
     </div>
